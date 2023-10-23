@@ -27,23 +27,35 @@ const reactionSchema = new mongoose.Schema({
 });
 
 // Thought schema referencing reaction subdoc
-const thoughtSchema = new mongoose.Schema({
-  thoughtText: {
-    type: String,
-    required: true,
-    minlength: 1,
-    maxlength: 280,
+const thoughtSchema = new mongoose.Schema(
+  {
+    thoughtText: {
+      type: String,
+      required: true,
+      minlength: 1,
+      maxlength: 280,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      get: (timestamp) => dateFormat(timestamp),
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    reactions: [reactionSchema],
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    get: (timestamp) => dateFormat(timestamp),
-  },
-  username: {
-    type: String,
-    required: true,
-  },
-  reactions: [reactionSchema],
+  {
+    toJSON: {
+      getters: true,
+    },
+    id: false,
+  }
+);
+
+thoughtSchema.virtual("reactionCount").get(function () {
+  return this.reactions.length;
 });
 
 const Thought = mongoose.model("Thought", thoughtSchema);
